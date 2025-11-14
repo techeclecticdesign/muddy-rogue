@@ -3,7 +3,7 @@ use tauri::{AppHandle, Emitter};
 #[tauri::command]
 async fn send_command(app: AppHandle, command: String) -> Result<(), String> {
     // Echo the command back
-    app.emit("stream-message", format!("> {}", command))
+    app.emit("stream-message", format!("> {command}"))
         .map_err(|e| e.to_string())?;
 
     // Simulate processing and response
@@ -24,10 +24,7 @@ fn process_command(command: &str) -> String {
         "time" => format!("Current time: {}", chrono::Local::now().format("%H:%M:%S")),
         "hello" => "Hello, adventurer! Welcome to the MUD.".to_string(),
         cmd if cmd.starts_with("echo ") => cmd.strip_prefix("echo ").unwrap_or("").to_string(),
-        _ => format!(
-            "Unknown command: {}. Type 'help' for available commands.",
-            command
-        ),
+        _ => format!("Unknown command: {command}. Type 'help' for available commands."),
     }
 }
 

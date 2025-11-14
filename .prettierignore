@@ -1,0 +1,23 @@
+# Dependencies
+node_modules
+dist
+dist-ssr
+
+# Build outputs
+src-tauri/target
+src-tauri/gen
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+
+# IDE
+.vscode
+.idea
+
+# Lock files
+package-lock.json
+pnpm-lock.yaml
+yarn.lock
