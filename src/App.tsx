@@ -45,6 +45,17 @@ function App() {
         }}
       >
         <MessageList messages={messages} />
+        <Box
+          sx={{
+            height: "4px",
+            background:
+              "linear-gradient(180deg, #444 0%, #525252ff 50%, #313131ff 100%)",
+            borderTop: "1px solid #555",
+            borderBottom: "1px solid #363636ff",
+            boxShadow:
+              "0 2px 4px rgba(78, 78, 78, 0.5), inset 0 1px 0 rgba(255,255,255,0.1)",
+          }}
+        />
         <MessageInput onSendMessage={sendCommand} />
       </Box>
     </ThemeProvider>
