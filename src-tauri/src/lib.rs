@@ -124,7 +124,7 @@ struct GameState {
 #[tauri::command]
 async fn send_command(app: AppHandle, command: String) -> Result<(), String> {
     // Echo the command back
-    app.emit("stream-message", format!("> {command}"))
+    app.emit("stream-message", format!("&gt; {command}"))
         .map_err(|e| e.to_string())?;
 
     let app_clone = app.clone();
