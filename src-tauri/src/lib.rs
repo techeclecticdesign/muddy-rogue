@@ -3,55 +3,106 @@ use std::collections::HashMap;
 use std::sync::Mutex;
 use tauri::{AppHandle, Emitter, Manager};
 
+#[derive(Debug, Deserialize, Serialize)]
+struct ZoneConfig {
+    zones: Vec<ZoneInfo>,
+    initial_zone: String,
+    initial_room: u32,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+struct ZoneInfo {
+    id: String,
+    name: String,
+    file: String,
+}
+
 #[derive(Debug, Deserialize, Serialize, Clone)]
 struct Room {
     id: u32,
     name: String,
     description: String,
-    exits: HashMap<String, u32>,
+    exits: HashMap<String, String>,
     objects: Vec<u32>,
 }
 
-struct Player {
-    current_room: u32,
+#[derive(Debug, Clone)]
+struct RoomLocation {
+    zone: String,
+    room_id: u32,
 }
 
-impl Player {
-    fn new(starting_room: u32) -> Self {
-        Player {
-            current_room: starting_room,
+impl RoomLocation {
+    fn parse(exit: &str, current_zone: &str) -> Self {
+        if let Some((zone, room)) = exit.split_once(':') {
+            RoomLocation {
+                zone: zone.to_string(),
+                room_id: room.parse().unwrap_or(0),
+            }
+        } else {
+            RoomLocation {
+                zone: current_zone.to_string(),
+                room_id: exit.parse().unwrap_or(0),
+            }
         }
     }
 
-    fn move_to(&mut self, room_id: u32) {
-        self.current_room = room_id;
+    fn to_key(&self) -> String {
+        format!("{}:{}", self.zone, self.room_id)
+    }
+}
+
+struct Player {
+    current_location: RoomLocation,
+}
+
+impl Player {
+    fn new(zone: String, room_id: u32) -> Self {
+        Player {
+            current_location: RoomLocation { zone, room_id },
+        }
+    }
+
+    fn move_to(&mut self, location: RoomLocation) {
+        self.current_location = location;
     }
 }
 
 struct Game {
-    rooms: HashMap<u32, Room>,
+    rooms: HashMap<String, (Room, String)>,
     player: Player,
 }
 
 impl Game {
-    fn new(rooms: Vec<Room>) -> Self {
-        let rooms_map: HashMap<u32, Room> = rooms.into_iter().map(|room| (room.id, room)).collect();
+    fn load_from_zones(
+        zones_json: &str,
+        zone_files: &[(&str, &str)],
+    ) -> Result<Self, serde_json::Error> {
+        let zone_config: ZoneConfig = serde_json::from_str(zones_json)?;
 
-        Game {
-            rooms: rooms_map,
-            player: Player::new(0),
+        let mut rooms_map = HashMap::new();
+
+        for zone_info in &zone_config.zones {
+            if let Some(&(_, json_data)) = zone_files.iter().find(|(id, _)| *id == zone_info.file) {
+                let rooms: Vec<Room> = serde_json::from_str(json_data)?;
+                for room in rooms {
+                    let key = format!("{}:{}", zone_info.id, room.id);
+                    rooms_map.insert(key, (room, zone_info.id.clone()));
+                }
+            }
         }
-    }
 
-    fn load_from_json(json_data: &str) -> Result<Self, serde_json::Error> {
-        let rooms: Vec<Room> = serde_json::from_str(json_data)?;
-        Ok(Game::new(rooms))
+        Ok(Game {
+            rooms: rooms_map,
+            player: Player::new(zone_config.initial_zone, zone_config.initial_room),
+        })
     }
 
     fn get_current_room_display(&self) -> Vec<String> {
         let mut messages = Vec::new();
 
-        if let Some(room) = self.rooms.get(&self.player.current_room) {
+        let key = self.player.current_location.to_key();
+        if let Some((room, _)) = self.rooms.get(&key) {
             messages.push(format!("**{}**", room.name));
             messages.push(room.description.clone());
 
@@ -64,7 +115,7 @@ impl Game {
         messages
     }
 
-    fn format_exits(&self, exits: &HashMap<String, u32>) -> String {
+    fn format_exits(&self, exits: &HashMap<String, String>) -> String {
         if exits.is_empty() {
             return String::new();
         }
@@ -97,6 +148,8 @@ impl Game {
             "nw" => "northwest".to_string(),
             "se" => "southeast".to_string(),
             "sw" => "southwest".to_string(),
+            "u" => "up".to_string(),
+            "d" => "down".to_string(),
             other => other.to_string(),
         }
     }
@@ -104,9 +157,21 @@ impl Game {
     fn process_move(&mut self, command: &str) -> Result<Vec<String>, String> {
         let direction = Self::expand_direction(command);
 
-        if let Some(room) = self.rooms.get(&self.player.current_room) {
-            if let Some(&destination) = room.exits.get(&direction) {
-                self.player.move_to(destination);
+        let key = self.player.current_location.to_key();
+        if let Some((room, zone)) = self.rooms.get(&key) {
+            if let Some(destination_str) = room.exits.get(&direction) {
+                let destination = RoomLocation::parse(destination_str, zone);
+
+                // Check if destination exists
+                if self.rooms.contains_key(&destination.to_key()) {
+                    self.player.move_to(destination);
+                } else {
+                    return Err(format!(
+                        "Error: Destination room not found ({})",
+                        destination.to_key()
+                    ));
+                }
+
                 Ok(self.get_current_room_display())
             } else {
                 Err("You can't go that way.".to_string())
@@ -178,7 +243,8 @@ fn process_command(app: &AppHandle, command: &str) -> Vec<String> {
         match cmd.as_str() {
             "help" => vec![
                 "Available commands:".to_string(),
-                "  Movement: n, s, e, w, ne, nw, se, sw (or full direction names)".to_string(),
+                "  Movement: n, s, e, w, ne, nw, se, sw, u, d (or full direction names)"
+                    .to_string(),
                 "  Other: help, look, time".to_string(),
             ],
             "look" | "l" => game.get_current_room_display(),
@@ -201,8 +267,14 @@ pub fn run() {
     tauri::Builder::default()
         .setup(|app| {
             // Initialize game state
-            let rooms_json = include_str!("../default.json");
-            let game = Game::load_from_json(rooms_json).expect("Failed to load game data");
+            let zones_config = include_str!("../rooms/zones.json");
+            let zone_files = [
+                ("millhaven.json", include_str!("../rooms/millhaven.json")),
+                // Add more zone files here as needed
+            ];
+
+            let game =
+                Game::load_from_zones(zones_config, &zone_files).expect("Failed to load game data");
 
             app.manage(GameState {
                 game: Mutex::new(Some(game)),

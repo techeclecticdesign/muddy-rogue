@@ -1,0 +1,11 @@
+{
+  "zones": [
+    {
+      "id": "millhaven",
+      "name": "Millhaven Town",
+      "file": "millhaven.json"
+    }
+  ],
+  "initial_zone": "millhaven",
+  "initial_room": 0
+}
