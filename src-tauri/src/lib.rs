@@ -266,6 +266,21 @@ fn process_command(app: &AppHandle, command: &str) -> Vec<String> {
 pub fn run() {
     tauri::Builder::default()
         .setup(|app| {
+            // Add menu
+            use tauri::menu::{MenuBuilder, MenuItemBuilder, SubmenuBuilder};
+
+            let quit = MenuItemBuilder::with_id("quit", "Exit").build(app)?;
+            let file_menu = SubmenuBuilder::new(app, "File").items(&[&quit]).build()?;
+
+            let menu = MenuBuilder::new(app).items(&[&file_menu]).build()?;
+
+            app.set_menu(menu)?;
+
+            app.on_menu_event(move |app, event| {
+                if event.id() == "quit" {
+                    app.exit(0);
+                }
+            });
             // Initialize game state
             let zones_config = include_str!("../rooms/zones.json");
             let zone_files = [
