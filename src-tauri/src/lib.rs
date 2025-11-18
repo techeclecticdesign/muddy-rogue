@@ -1,9 +1,11 @@
 mod command_parser;
+mod minimap;
 mod player;
 mod room;
 mod zone;
 
 use command_parser::{get_room_display, process_move, HELP_TEXT};
+use minimap::{generate_minimap, MinimapNode};
 use player::Player;
 use std::sync::Mutex;
 use tauri::{AppHandle, Emitter, Manager};
@@ -84,6 +86,22 @@ async fn get_start_message(app: AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command]
+async fn get_minimap(app: AppHandle) -> Result<Vec<MinimapNode>, String> {
+    let state = app.state::<GameState>();
+    let game_lock = state.game.lock().map_err(|e| e.to_string())?;
+
+    let game = game_lock
+        .as_ref()
+        .ok_or_else(|| "Game not initialized".to_string())?;
+
+    Ok(generate_minimap(
+        &game.player.current_location,
+        &game.rooms,
+        2,
+    ))
+}
+
 fn process_command(app: &AppHandle, command: &str) -> Vec<String> {
     let state = app.state::<GameState>();
     let Ok(mut game_lock) = state.game.lock() else {
@@ -97,6 +115,7 @@ fn process_command(app: &AppHandle, command: &str) -> Vec<String> {
 
     // Try movement command first
     if let Ok(messages) = game.process_move(&cmd) {
+        let _ = app.emit("minimap-update", ());
         return messages;
     }
 
@@ -123,23 +142,42 @@ pub fn run() {
             initialize_game(app)?;
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![send_command, get_start_message])
+        .invoke_handler(tauri::generate_handler![
+            send_command,
+            get_start_message,
+            get_minimap
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
 
 fn setup_menu(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
-    use tauri::menu::{MenuBuilder, MenuItemBuilder, SubmenuBuilder};
+    use tauri::menu::{CheckMenuItemBuilder, MenuBuilder, MenuItemBuilder, SubmenuBuilder};
 
     let quit = MenuItemBuilder::with_id("quit", "Exit").build(app)?;
+    let toggle_minimap = CheckMenuItemBuilder::new("Toggle Minimap")
+        .id("toggle_minimap")
+        .checked(true)
+        .build(app)?;
+
     let file_menu = SubmenuBuilder::new(app, "File").items(&[&quit]).build()?;
-    let menu = MenuBuilder::new(app).items(&[&file_menu]).build()?;
+    let view_menu = SubmenuBuilder::new(app, "View")
+        .items(&[&toggle_minimap])
+        .build()?;
+    let menu = MenuBuilder::new(app)
+        .items(&[&file_menu, &view_menu])
+        .build()?;
 
     app.set_menu(menu)?;
 
     app.on_menu_event(move |app, event| {
-        if event.id() == "quit" {
-            app.exit(0);
+        match event.id().as_ref() {
+            "quit" => app.exit(0),
+            "toggle_minimap" => {
+                // Emit event to frontend to toggle minimap
+                let _ = app.emit("toggle-minimap", ());
+            }
+            _ => {}
         }
     });
 

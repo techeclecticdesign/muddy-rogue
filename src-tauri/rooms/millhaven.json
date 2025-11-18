@@ -2,102 +2,156 @@
   {
     "id": 0,
     "name": "Town Square",
-    "description": "You stand in the heart of Millhaven, a bustling fantasy town square paved with ancient cobblestones. A grand fountain featuring a stone dragon dominates the center, its crystalline water sparkling in the light. Merchants hawk their wares from colorful stalls around the perimeter, and the smell of fresh bread and exotic spices fills the air. Town folk bustle about their daily business, and children chase each other between the market stalls with gleeful abandon.",
+    "description": "You stand in the bustling heart of Millhaven, where the town's two main roads intersect. A magnificent stone fountain depicting a silver stag sprays crystal-clear water into the air. Colorful market stalls line the edges of the square, and townsfolk go about their daily business. The air smells of fresh bread, spices, and the faint scent of forge smoke.",
     "exits": {
       "north": "1",
-      "east": "2",
-      "south": "3",
+      "south": "2",
+      "east": "3",
       "west": "4"
     },
     "objects": []
   },
   {
     "id": 1,
-    "name": "The Silver Stag Inn",
-    "description": "The warm, inviting interior of the Silver Stag Inn greets you with the crackle of a roaring fireplace and the rich aroma of roasted meat and ale. Wooden tables and benches fill the common room, where patrons laugh and swap stories of their adventures. A sturdy oak bar runs along one wall, behind which shelves display an impressive collection of bottles and tankards. A bard in the corner strums a lute, adding a melodic backdrop to the convivial atmosphere.",
+    "name": "North Road",
+    "description": "You walk along Millhaven's main northern thoroughfare. Well-kept shops and businesses line both sides of the cobblestone street. Lampposts with enchanted blue flames cast a warm glow, and the sounds of commerce and conversation fill the air. The road continues north toward the residential district and south back to the town square.",
     "exits": {
+      "north": "5",
       "south": "0",
-      "east": "5"
+      "east": "6",
+      "west": "7"
     },
     "objects": []
   },
   {
     "id": 2,
-    "name": "Blacksmith's Forge",
-    "description": "The intense heat hits you immediately as you enter the blacksmith's domain. The forge glows orange-red, casting dancing shadows on walls adorned with horseshoes, tools, and works in progress. The rhythmic clang of hammer on anvil echoes through the space as Master Ironheart shapes glowing metal with practiced precision. Racks of completed weapons and armor line the walls, each piece a testament to exceptional craftsmanship. Sparks fly with each mighty blow, briefly illuminating the soot-darkened rafters above.",
+    "name": "South Road",
+    "description": "This southern stretch of Millhaven's main road leads toward the town gate and farming communities beyond. The buildings here are more practical - warehouses, stables, and workshops. Heavy wagons rumble along the wide street, and the air carries scents of hay, leather, and earth.",
     "exits": {
-      "west": "0",
-      "north": "5"
+      "north": "0",
+      "south": "8",
+      "east": "9",
+      "west": "10"
     },
     "objects": []
   },
   {
     "id": 3,
-    "name": "Temple of the Dawn",
-    "description": "Serenity envelops you as you step into this sacred space dedicated to the goddess of light and healing. Shafts of colored light stream through stained glass windows, painting the marble floor in brilliant hues. The air is sweet with incense, and the sound of quiet prayer and meditation creates a peaceful ambiance. An ornate altar stands at the far end, adorned with fresh flowers and candles that never seem to burn down. Acolytes in white robes move silently through the space, tending to the faithful.",
+    "name": "East Road",
+    "description": "The eastern road of Millhaven climbs gently toward the town's temple district. The architecture becomes more elegant here, with carved stone facades and well-tended flower boxes. The sounds of the busy town square fade behind you, replaced by peaceful quiet and occasional temple bells.",
     "exits": {
-      "north": "0",
-      "east": "6"
-    },
-    "objects": []
-  },
-  {
-    "id": 4,
-    "name": "The Mystic Emporium",
-    "description": "You enter a shop that seems larger on the inside than the outside, filled with the mysterious and the magical. Shelves overflow with strange artifacts, dusty tomes, crystal orbs, and bottles containing liquids of every imaginable color. The scent of exotic incense mingles with more arcane odors you can't quite identify. Behind a cluttered counter, a wizened shopkeeper with knowing eyes watches you carefully. Soft blue magelight illuminates the space, and you occasionally hear whispers from objects that shouldn't be able to speak.",
-    "exits": {
-      "east": "0",
-      "south": "7"
-    },
-    "objects": []
-  },
-  {
-    "id": 5,
-    "name": "The Market Gardens",
-    "description": "A delightful garden blooms behind the main buildings, serving as both a peaceful retreat and a source of fresh produce for the town. Neat rows of vegetables grow alongside vibrant flower beds, and fruit trees provide shade for wooden benches where townsfolk rest. A gentle stream winds through the garden, its banks lined with smooth stones. Butterflies dance from blossom to blossom, and the busy hum of bees fills the air. An elderly gardener tends the plants with obvious love and care.",
-    "exits": {
-      "south": "2",
-      "west": "1"
-    },
-    "objects": []
-  },
-  {
-    "id": 6,
-    "name": "The Healing House",
-    "description": "This clean, well-organized building serves as the town's primary location for treating injuries and illnesses. The smell of medicinal herbs hangs in the air, mixing with the scent of fresh linens. Beds line the walls, most empty but a few occupied by patients resting comfortably. Shelves hold neatly labeled jars of salves, poultices, and dried herbs. A skilled healer moves between patients, checking on their recovery with gentle efficiency. Sunlight streams through large windows, as fresh air and light are considered essential to healing.",
-    "exits": {
-      "west": "3",
-      "south": "8"
-    },
-    "objects": []
-  },
-  {
-    "id": 7,
-    "name": "The Town Archives",
-    "description": "Hushed reverence fills this repository of knowledge and history. Floor-to-ceiling shelves groan under the weight of countless books, scrolls, and documents chronicling centuries of local history and lore. The musty smell of old parchment pervades everything, and dust motes dance in the thin beams of light filtering through high windows. A dedicated archivist sits at a reading desk, carefully transcribing a crumbling manuscript. The air itself seems heavy with the weight of accumulated wisdom and forgotten secrets.",
-    "exits": {
-      "north": "4",
-      "east": "8"
-    },
-    "objects": []
-  },
-  {
-    "id": 8,
-    "name": "The Moonlit Alley",
-    "description": "This narrow passage between buildings sees little sunlight even at noon, creating a perpetually shadowy atmosphere. The cobblestones here are worn smooth by centuries of foot traffic, and ivy creeps up the walls on either side. Despite its dim appearance, the alley is well-maintained and safe, serving as a shortcut between different parts of town. At night, enchanted lanterns cast a silvery glow, giving the passage its name. You occasionally hear the scurrying of small creatures in the shadows, though nothing threatening.",
-    "exits": {
+      "east": "11",
+      "west": "0",
       "north": "6",
-      "west": "7",
       "south": "9"
     },
     "objects": []
   },
   {
-    "id": 9,
-    "name": "The Town Gate",
-    "description": "You stand before the southern entrance to Millhaven, where a sturdy wooden gate reinforced with iron bands marks the boundary between civilization and the wilds beyond. Guard towers flank the gate, and watchful sentries keep vigilant eyes on all who come and go. A worn dirt road stretches south into the distance, disappearing into the forest. Merchants with loaded wagons wait their turn for inspection, while travelers share news from distant lands. The gate itself bears the town's coat of arms, a silver stag on a green field, carved deep into the ancient oak.",
+    "id": 4,
+    "name": "West Road",
+    "description": "Millhaven's western road descends toward the merchant and entertainment district. The atmosphere is lively here, with colorful banners advertising various establishments and the sound of music drifting from open doorways. The air smells of exotic spices, perfumes, and roasting meats.",
     "exits": {
-      "north": "8"
+      "west": "12",
+      "east": "0",
+      "north": "7",
+      "south": "10"
+    },
+    "objects": []
+  },
+  {
+    "id": 5,
+    "name": "The Silver Stag Inn",
+    "description": "This cozy, three-story inn boasts a sign depicting a majestic silver stag. Inside, the air is warm and filled with the rich aromas of roasted meat, fresh bread, and ale. A massive stone fireplace dominates the common room, where travelers and locals share stories at worn wooden tables. The innkeeper smiles warmly from behind a polished oak bar.",
+    "exits": {
+      "south": "1"
+    },
+    "objects": []
+  },
+  {
+    "id": 6,
+    "name": "Blacksmith's Forge",
+    "description": "The heat hits you first as you enter Ironheart's Smithy. The orange glow of the forge illuminates tools and works in progress hanging from the walls. The rhythmic clang of hammer on anvil echoes through the space as the master blacksmith shapes glowing metal. Finished weapons and armor gleam on display racks, testaments to exceptional craftsmanship.",
+    "exits": {
+      "west": "1",
+      "south": "3"
+    },
+    "objects": []
+  },
+  {
+    "id": 7,
+    "name": "The Mystic Emporium",
+    "description": "A shop that seems larger inside than out. Shelves overflow with strange artifacts, crystal orbs, dusty tomes, and bottles of colorful liquids. The air smells of exotic incense and ozone. Magical lights float near the ceiling, casting shifting shadows. An elderly shopkeeper with knowing eyes watches you from behind a cluttered counter.",
+    "exits": {
+      "east": "1",
+      "south": "4"
+    },
+    "objects": []
+  },
+  {
+    "id": 8,
+    "name": "Town Gate",
+    "description": "You stand before Millhaven's main southern gate, a massive structure of oak and iron. Guards in the town's colors stand watch, inspecting wagons and travelers coming from the farmlands beyond. Beyond the gate, the road stretches into the distance, lined with fields and the dark edge of the Whispering Wood.",
+    "exits": {
+      "north": "2"
+    },
+    "objects": []
+  },
+  {
+    "id": 9,
+    "name": "Healing House",
+    "description": "This clean, organized building serves as Millhaven's primary clinic. The scent of medicinal herbs and fresh linens fills the air. Sunlight streams through large windows, illuminating beds with recovering patients and shelves of carefully labeled remedies. A calm healer moves between patients with quiet efficiency.",
+    "exits": {
+      "north": "3",
+      "west": "2"
+    },
+    "objects": []
+  },
+  {
+    "id": 10,
+    "name": "Stables & Cartwright",
+    "description": "The sounds and smells of horses, leather, and wood shavings fill this practical establishment. Well-kept horses watch from their stalls while craftsmen repair wagons and harnesses. A friendly stablehand greets you, brushing sawdust from his apron as he approaches.",
+    "exits": {
+      "north": "4",
+      "east": "2"
+    },
+    "objects": []
+  },
+  {
+    "id": 11,
+    "name": "Temple of the Dawn",
+    "description": "Serenity envelops you in this beautiful temple dedicated to the goddess of light. Stained glass windows paint the marble floor in brilliant colors, and the air is sweet with incense. Quiet prayers echo softly in the vast space. Acolytes in white robes tend the altar adorned with fresh flowers and eternal candles.",
+    "exits": {
+      "west": "3"
+    },
+    "objects": []
+  },
+  {
+    "id": 12,
+    "name": "Market Square",
+    "description": "A vibrant open-air market fills this western plaza. Dozens of colorful stalls offer everything from fresh produce to exotic imports. Merchants call out their wares while customers haggle cheerfully. The air is thick with the smells of spices, baked goods, and the sea breeze from distant ports.",
+    "exits": {
+      "east": "4"
+    },
+    "objects": []
+  },
+  {
+    "id": 13,
+    "name": "Moonlit Alley",
+    "description": "This narrow passage runs behind the main western establishments. Though shadowy, it's clean and well-maintained, with ivy climbing the stone walls on either side. Enchanted silver lanterns cast a soft glow, giving the alley its name. You can hear the muffled sounds of the market and inn from here.",
+    "exits": {
+      "north": "7",
+      "south": "10"
+    },
+    "objects": []
+  },
+  {
+    "id": 14,
+    "name": "Garden Walk",
+    "description": "A peaceful path that winds between the eastern buildings, lined with flowering plants and aromatic herbs. Benches placed along the way offer rest and contemplation. The sounds of the temple bells and healing house create a tranquil atmosphere. Butterflies dance among the blossoms in the gentle breeze.",
+    "exits": {
+      "north": "6",
+      "south": "9"
     },
     "objects": []
   }
