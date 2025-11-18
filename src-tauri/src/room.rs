@@ -1,3 +1,4 @@
+use crate::text_utils::format_list;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -42,19 +43,11 @@ pub fn format_exits(exits: &HashMap<String, String>) -> String {
     }
 
     let exit_names: Vec<String> = exits.keys().map(|s| format!("**{s}**")).collect();
+    let formatted_list = format_list(&exit_names);
 
     if exit_names.len() == 1 {
-        format!("There is an available exit to the {}.", exit_names[0])
+        format!("There is an available exit to the {formatted_list}.")
     } else {
-        let (last, rest) = exit_names.split_last().unwrap();
-        if rest.len() == 1 {
-            format!("There are available exits to the {} and {}.", rest[0], last)
-        } else {
-            format!(
-                "There are available exits to the {} and {}.",
-                rest.join(", "),
-                last
-            )
-        }
+        format!("There are available exits to the {formatted_list}.")
     }
 }

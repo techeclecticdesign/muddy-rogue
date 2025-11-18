@@ -34,3 +34,15 @@ pub fn wrap_lines(text: &str, line_length: usize) -> Vec<String> {
 
     lines
 }
+
+pub fn format_list(items: &[String]) -> String {
+    match items.len() {
+        0 => String::new(),
+        1 => items[0].clone(),
+        2 => format!("{} and {}", items[0], items[1]),
+        _ => {
+            let (last, rest) = items.split_last().unwrap();
+            format!("{}, and {}", rest.join(", "), last)
+        }
+    }
+}
