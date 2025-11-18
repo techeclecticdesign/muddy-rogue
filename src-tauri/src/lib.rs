@@ -2,14 +2,23 @@ mod command_parser;
 mod minimap;
 mod player;
 mod room;
+mod settings;
+mod text_utils;
 mod zone;
 
 use command_parser::{get_room_display, process_move, HELP_TEXT};
 use minimap::{generate_minimap, MinimapNode};
 use player::Player;
+use settings::Settings;
+use std::path::PathBuf;
 use std::sync::Mutex;
 use tauri::{AppHandle, Emitter, Manager};
 use zone::{load_rooms, RoomMap, ZoneConfig};
+
+struct SettingsState {
+    settings: Mutex<Settings>,
+    settings_path: PathBuf,
+}
 
 struct Game {
     rooms: RoomMap,
@@ -43,17 +52,55 @@ struct GameState {
     game: Mutex<Option<Game>>,
 }
 
+fn emit_game_message(app: &AppHandle, message: &str) -> Result<(), String> {
+    let state = app.state::<SettingsState>();
+
+    let (wrap_enabled, wrap_len) = match state.settings.lock() {
+        Ok(s) => (s.word_wrap_enabled, s.word_wrap_length as usize),
+        Err(_) => (true, 100),
+    };
+
+    let final_message = if wrap_enabled {
+        // Wrap the lines, then join them back into a single string with \n
+        text_utils::wrap_lines(message, wrap_len).join("\n")
+    } else {
+        message.to_string()
+    };
+
+    app.emit("stream-message", final_message)
+        .map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
+#[tauri::command]
+async fn get_settings(app: AppHandle) -> Result<Settings, String> {
+    let state = app.state::<SettingsState>();
+    let settings = state.settings.lock().map_err(|e| e.to_string())?;
+    Ok(settings.clone())
+}
+
+#[tauri::command]
+async fn save_settings(app: AppHandle, settings: Settings) -> Result<(), String> {
+    let state = app.state::<SettingsState>();
+    let mut current_settings = state.settings.lock().map_err(|e| e.to_string())?;
+    *current_settings = settings.clone();
+    settings
+        .save_to_path(&state.settings_path)
+        .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
 #[tauri::command]
 async fn send_command(app: AppHandle, command: String) -> Result<(), String> {
-    app.emit("stream-message", format!("&gt; {command}"))
-        .map_err(|e| e.to_string())?;
+    emit_game_message(&app, &format!("> {command}"))?;
 
     tauri::async_runtime::spawn(async move {
         tokio::time::sleep(tokio::time::Duration::from_millis(100)).await;
 
         let responses = process_command(&app, &command);
         for response in responses {
-            let _ = app.emit("stream-message", response);
+            let _ = emit_game_message(&app, &response);
         }
     });
 
@@ -74,12 +121,12 @@ async fn get_start_message(app: AppHandle) -> Result<(), String> {
     };
 
     tauri::async_runtime::spawn(async move {
-        let _ = app.emit("stream-message", "=== Welcome to Muddy Rogue ===");
-        let _ = app.emit("stream-message", "Type 'help' for available commands.");
-        let _ = app.emit("stream-message", "");
+        let _ = emit_game_message(&app, "=== Welcome to Muddy Rogue ===");
+        let _ = emit_game_message(&app, "Type 'help' for available commands.");
+        let _ = emit_game_message(&app, "");
 
         for message in messages {
-            let _ = app.emit("stream-message", message);
+            let _ = emit_game_message(&app, &message);
         }
     });
 
@@ -140,12 +187,15 @@ pub fn run() {
         .setup(|app| {
             setup_menu(app)?;
             initialize_game(app)?;
+            initialize_settings(app)?;
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
             send_command,
             get_start_message,
-            get_minimap
+            get_minimap,
+            get_settings,
+            save_settings,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
@@ -159,13 +209,14 @@ fn setup_menu(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
         .id("toggle_minimap")
         .checked(true)
         .build(app)?;
+    let open_settings = MenuItemBuilder::with_id("open_settings", "Settings...").build(app)?;
 
     let file_menu = SubmenuBuilder::new(app, "File").items(&[&quit]).build()?;
-    let view_menu = SubmenuBuilder::new(app, "View")
-        .items(&[&toggle_minimap])
+    let tools_menu = SubmenuBuilder::new(app, "Tools")
+        .items(&[&toggle_minimap, &open_settings])
         .build()?;
     let menu = MenuBuilder::new(app)
-        .items(&[&file_menu, &view_menu])
+        .items(&[&file_menu, &tools_menu])
         .build()?;
 
     app.set_menu(menu)?;
@@ -177,10 +228,30 @@ fn setup_menu(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
                 // Emit event to frontend to toggle minimap
                 let _ = app.emit("toggle-minimap", ());
             }
+            "open_settings" => {
+                let _ = app.emit("open-settings", ());
+            }
             _ => {}
         }
     });
 
+    Ok(())
+}
+
+fn initialize_settings(app: &tauri::App) -> Result<(), Box<dyn std::error::Error>> {
+    let app_config_dir = app
+        .path()
+        .app_config_dir()
+        .expect("failed to resolve app config dir");
+
+    let settings_path = app_config_dir.join("settings.json");
+    std::fs::create_dir_all(&app_config_dir).ok();
+
+    let settings = Settings::load_from_path(&settings_path);
+    app.manage(SettingsState {
+        settings: Mutex::new(settings),
+        settings_path,
+    });
     Ok(())
 }
 

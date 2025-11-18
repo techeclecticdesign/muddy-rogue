@@ -8,6 +8,7 @@ import { useMessageStream } from "./hooks/useMessageStream";
 import { useSendCommand } from "./hooks/useSendCommand";
 import { MessageList } from "./components/MessageList";
 import { MessageInput } from "./components/MessageInput";
+import SettingsDialog from "./components/SettingsDialog";
 import MiniMap from "./components/MiniMap";
 
 const darkTheme = createTheme({
@@ -31,6 +32,7 @@ function App() {
   const sendCommand = useSendCommand();
 
   const [miniMapEnabled, setMiniMapEnabled] = useState(true);
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   useEffect(() => {
     invoke("get_start_message");
@@ -46,10 +48,24 @@ function App() {
     };
   }, []);
 
+  useEffect(() => {
+    const unlisten = listen("open-settings", () => {
+      setSettingsOpen(true);
+    });
+
+    return () => {
+      unlisten.then((fn) => fn());
+    };
+  }, []);
+
   return (
     <ThemeProvider theme={darkTheme}>
       <CssBaseline />
       <MiniMap enabled={miniMapEnabled} />
+      <SettingsDialog
+        open={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+      />
       <Box
         sx={{
           display: "flex",

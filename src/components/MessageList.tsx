@@ -17,6 +17,7 @@ export const MessageList = ({ messages }: MessageListProps) => {
   return (
     <Box
       sx={{
+        whiteSpace: "pre-wrap",
         flex: 1,
         overflowY: "auto",
         p: 2,
